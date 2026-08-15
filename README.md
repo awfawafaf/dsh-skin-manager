@@ -1,25 +1,27 @@
 # dsh-skin-manager
 
-DSH 皮肤管理器:在 DeepSeek Harness Web GUI 内**实时切换皮肤**,无需重启、无需刷新。
+DSH 皮肤管理器:在 DeepSeek Harness Web GUI 内**实时切换皮肤**,无需重启、无需刷新。同时拥有独立的外观设置页(与「通用」「模型」并列)。
+
+![外观设置页](docs/appearance.png)
 
 - **经典皮肤(内置)** = DSH 官方默认外观,不加载任何皮肤效果;
 - **注册式皮肤契约**:任意皮肤(自写或第三方)注册即接入 —— 激活、切换、持久化由管理器统一负责;
-- 切换入口:设置 → 常规 → 「皮肤」一行(与「外观」并列);
+- **独立「外观」设置页**:设置 → **外观**,「皮肤」一行与其他外观项(如自定义背景)集中管理;
 - 选择持久化在 Host 设置文档(`skin-manager.skin`),重启后自动恢复。
 
 ## 安装
 
 ```sh
-dsh plugin --profile web add dsh-skin-manager
+dsh plugin --profile web add github:awfawafaf/dsh-skin-manager
 ```
 
 本地开发安装:`dsh plugin --profile web add D:/ds_harness/plugins/projects/dsh-skin-manager`(会写成 `link:` 依赖,改代码重启即生效)。安装后**重启 dsh web**。
 
-皮肤插件(如深海女仆)各自单独安装;管理器自动发现并列出已注册的皮肤。
+皮肤插件(如深海女仆、自定义背景)各自单独安装;管理器自动发现并列出已注册的皮肤。
 
 ## 使用
 
-设置 → 常规 → 「皮肤」:点击皮肤芯片即切换,立即生效。再次打开 dsh 会记住上次选择。
+设置 → **外观** → 「皮肤」:点击皮肤芯片即切换,立即生效。再次打开 dsh 会记住上次选择。
 
 ## 皮肤契约(给皮肤作者)
 
