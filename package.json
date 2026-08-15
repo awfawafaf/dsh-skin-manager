@@ -1,0 +1,110 @@
+{
+    "name":  "dsh-skin-manager",
+    "description":  "鐨偆绠＄悊鍣?鍦?dsh Web GUI 鍐呭疄鏃跺垏鎹㈢毊鑲ゃ€傜粡鍏哥毊鑲?= DSH 瀹樻柟澶栬;浠绘剰鐨偆(鑷啓鎴栫涓夋柟)娉ㄥ唽鍗虫帴鍏?婵€娲?鍒囨崲/鎸佷箙鍖栫敱绠＄悊鍣ㄧ粺涓€璐熻矗",
+    "version":  "0.1.0",
+    "license":  "MIT",
+    "type":  "module",
+    "main":  "lib/index.js",
+    "types":  "lib/types/index.d.ts",
+    "exports":  {
+                    ".":  {
+                              "types":  "./lib/types/index.d.ts",
+                              "default":  "./lib/index.js"
+                          },
+                    "./client":  {
+                                     "types":  "./lib/types/client/index.d.ts",
+                                     "default":  "./lib/client.js"
+                                 },
+                    "./cordis.patch.yml":  "./cordis.patch.yml",
+                    "./package.json":  "./package.json"
+                },
+    "dsh":  {
+                "bundle":  {
+                               "patch":  "./cordis.patch.yml"
+                           },
+                "client":  {
+                               "platform":  "web",
+                               "inject":  [
+                                              "@deepseek-ai/dsh-client-runtime",
+                                              "@deepseek-ai/dsh-client-ui-slots",
+                                              "@deepseek-ai/dsh-client-locale",
+                                              "@deepseek-ai/dsh-client-ui-settings"
+                                          ]
+                           }
+            },
+    "files":  [
+                  "lib",
+                  "cordis.patch.yml",
+                  "README.md",
+                  "LICENSE"
+              ],
+    "scripts":  {
+                    "build":  "tsc -p tsconfig.json \u0026\u0026 tsdown",
+                    "watch":  "tsdown --watch",
+                    "typecheck":  "tsc -p tsconfig.json --noEmit",
+                    "test":  "vitest run",
+                    "check":  "pnpm run typecheck \u0026\u0026 pnpm run test \u0026\u0026 pnpm run build"
+                },
+    "peerDependencies":  {
+                             "@deepseek-ai/cordis":  "^4.0.1",
+                             "@deepseek-ai/schemastery":  "^3.18.1",
+                             "@deepseek-ai/dsh-settings":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-client-runtime":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-client-ui-slots":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-client-ui-settings":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-client-locale":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-client-connection":  "^0.1.0-rc.6",
+                             "react":  "^18.2.0"
+                         },
+    "peerDependenciesMeta":  {
+                                 "@deepseek-ai/cordis":  {
+                                                             "optional":  true
+                                                         },
+                                 "@deepseek-ai/schemastery":  {
+                                                                  "optional":  true
+                                                              },
+                                 "@deepseek-ai/dsh-settings":  {
+                                                                   "optional":  true
+                                                               },
+                                 "@deepseek-ai/dsh-client-runtime":  {
+                                                                         "optional":  true
+                                                                     },
+                                 "@deepseek-ai/dsh-client-ui-slots":  {
+                                                                          "optional":  true
+                                                                      },
+                                 "@deepseek-ai/dsh-client-ui-settings":  {
+                                                                             "optional":  true
+                                                                         },
+                                 "@deepseek-ai/dsh-client-locale":  {
+                                                                        "optional":  true
+                                                                    },
+                                 "@deepseek-ai/dsh-client-connection":  {
+                                                                            "optional":  true
+                                                                        },
+                                 "react":  {
+                                               "optional":  true
+                                           }
+                             },
+    "devDependencies":  {
+                            "@deepseek-ai/cordis":  "^4.0.1",
+                            "@deepseek-ai/schemastery":  "^3.18.1",
+                            "@deepseek-ai/dsh-settings":  "^0.1.0-rc.6",
+                            "@deepseek-ai/dsh-client-runtime":  "^0.1.0-rc.6",
+                            "@deepseek-ai/dsh-client-ui-slots":  "^0.1.0-rc.6",
+                            "@deepseek-ai/dsh-client-ui-settings":  "^0.1.0-rc.6",
+                            "@deepseek-ai/dsh-client-locale":  "^0.1.0-rc.6",
+                            "@deepseek-ai/dsh-client-connection":  "^0.1.0-rc.6",
+                            "@types/node":  "^24.0.0",
+                            "@types/react":  "~18.3.1",
+                            "@types/react-dom":  "~18.3.1",
+                            "jsdom":  "29.1.1",
+                            "lightningcss":  "^1.32.0",
+                            "react":  "^18.2.0",
+                            "react-dom":  "^18.2.0",
+                            "tsdown":  "0.22.14",
+                            "typescript":  "^6.0.3",
+                            "vitest":  "^4.1.8",
+                            "@testing-library/dom":  "^10.4.0",
+                            "@testing-library/react":  "^16.1.0"
+                        }
+}

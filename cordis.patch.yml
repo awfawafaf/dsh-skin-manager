@@ -1,0 +1,13 @@
+# dsh-skin-manager bundle patch: mounts the skin-manager plugin into a dsh
+# profile composition. The host half registers the durable `skin-manager`
+# settings namespace; the client half provides the `skinManager` service
+# (skin registry + active-skin persistence + instant apply) and the
+# General-section skin row.
+#
+# Install: `dsh plugin --profile <name> add <this package>` (npm, git, or a
+# local path). The `dsh plugin` command pnpm-installs the package into the
+# profile and reconciles it into the profile's `dsh.profile.bundles` layer
+# list. Restart the target profile after installing.
+- insert:
+    - id: skin-manager
+      name: dsh-skin-manager
