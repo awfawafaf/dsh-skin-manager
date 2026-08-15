@@ -10,6 +10,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 }
 export { CLASSIC_SKIN, SkinManagerRuntime } from './skin-manager.ts';
 export type { SkinManagerSnapshot } from '../skin-contract.ts';
+export type { SettingsAppearanceItemOwnerProps } from './appearance-section.tsx';
 /** Required services: settings transport plus slots/locale for the skin row. */
 export declare const inject: string[];
 /**

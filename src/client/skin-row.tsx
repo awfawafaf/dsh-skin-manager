@@ -1,7 +1,7 @@
 /**
- * Skin preference row registered into the General section item slot: title +
- * one chip per registered skin. Selection follows the persisted preference
- * (the manager's active id), never a local guess.
+ * Skin preference row registered into the Appearance section item slot:
+ * title + one chip per registered skin. Selection follows the persisted
+ * preference (the manager's active id), never a local guess.
  */
 import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
@@ -17,7 +17,7 @@ export interface SkinRowInjected {
 
 /** Full component props: runtime share + store share + locale seat + injected face. */
 export type SkinRowComponentProps =
-  PropsRuntime<'settings.general.item'> & PropsStore<ReturnType<typeof createSkinRowStore>>
+  PropsRuntime<'settings.appearance.item'> & PropsStore<ReturnType<typeof createSkinRowStore>>
   & PropsLocale<'settings.skin-manager'> & SkinRowInjected
 
 /**

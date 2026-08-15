@@ -43,9 +43,9 @@ function fakeHost() {
 function fakeCtx() {
   const provided = new Map<string, unknown>()
   const effects: (() => unknown)[] = []
-  let slotName: string | undefined
-  let registration: RowRegistration | undefined
+  const registrations: Array<{ slotName: string; registration: RowRegistration }> = []
   let localeNamespace: string | undefined
+  let injectName: string | undefined
   const host = fakeHost()
 
   const ctx = {
@@ -55,17 +55,18 @@ function fakeCtx() {
     effect: (factory: () => unknown) => { effects.push(factory()) },
     locale: {
       register: (namespace: string) => { localeNamespace = namespace },
+      bind: () => (key: string) => key,
     },
     settingsScope: {
       bind: () => host.scope,
     },
     slots: {
       inject: (name: string, factory: () => unknown) => {
-        slotName = name
+        injectName = name
         factory()
       },
       register: (options: RowRegistration) => {
-        registration = options
+        registrations.push({ slotName: injectName ?? '', registration: options })
         return () => {}
       },
     },
@@ -75,7 +76,7 @@ function fakeCtx() {
     ctx: ctx as unknown as ClientContext,
     provided,
     host,
-    readSlot: () => ({ slotName, registration }),
+    readRegistrations: () => registrations,
     readLocale: () => localeNamespace,
   }
 }
@@ -88,22 +89,28 @@ describe('dsh-skin-manager client apply', () => {
     expect(manifest.peerDependencies['@deepseek-ai/cordis']).toBe('^4.0.1')
   })
 
-  it('provides the skinManager service and registers the General-section row', () => {
-    const { ctx, provided, readSlot, readLocale } = fakeCtx()
+  it('provides the skinManager service, the Appearance section, and the skin row', () => {
+    const { ctx, provided, readRegistrations, readLocale } = fakeCtx()
     apply(ctx)
 
     expect(provided.get('skinManager')).toBeInstanceOf(SkinManagerRuntime)
     expect(readLocale()).toBe(SETTINGS_NS)
-    const { slotName, registration } = readSlot()!
-    expect(slotName).toBe('settings.general.item')
-    expect(registration!.name).toBe('settings.general.item')
-    expect(registration!.id).toBe('skin-manager')
-    expect(registration!.order).toBe(20)
-    expect(registration!.locale).toBe(SETTINGS_NS)
+    const entries = readRegistrations()
+
+    const section = entries.find(entry => entry.registration.id === 'appearance')!
+    expect(section.slotName).toBe('settings.section')
+    expect(section.registration.name).toBe('settings.section')
+    expect(section.registration.order).toBe(5)
+
+    const row = entries.find(entry => entry.registration.id === 'skin-manager')!
+    expect(row.slotName).toBe('settings.appearance.item')
+    expect(row.registration.name).toBe('settings.appearance.item')
+    expect(row.registration.order).toBe(20)
+    expect(row.registration.locale).toBe(SETTINGS_NS)
   })
 
   it('drives a persisted switch through the injected setSkin face', () => {
-    const { ctx, provided, host, readSlot } = fakeCtx()
+    const { ctx, provided, host, readRegistrations } = fakeCtx()
     apply(ctx)
 
     const runtime = provided.get('skinManager') as SkinManagerRuntime
@@ -112,7 +119,8 @@ describe('dsh-skin-manager client apply', () => {
     runtime.register(skin)
 
     const syncSpy = vi.fn()
-    const { setSkin } = readSlot()!.registration!.inject({ sync: syncSpy })
+    const row = readRegistrations().find(entry => entry.registration.id === 'skin-manager')!
+    const { setSkin } = row.registration.inject({ sync: syncSpy })
     expect(syncSpy).toHaveBeenCalledWith(expect.objectContaining({ activeId: 'classic' }))
 
     setSkin('maid-atelier')
