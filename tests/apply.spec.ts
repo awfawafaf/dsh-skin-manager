@@ -6,7 +6,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type { SkinDefinition } from '../src/skin-contract.ts'
 import { apply, SETTINGS_NS } from '../src/client/index.ts'
@@ -22,31 +22,31 @@ interface RowRegistration {
   inject: (actions: unknown) => { setSkin: (id: string) => void }
 }
 
-function fakeHost() {
-  let value: SkinSettings | undefined
-  const listeners = new Set<() => void>()
-  return {
-    scope: {
-      getSnapshot: () => ({ value }),
-      set: async (field: string, next: unknown) => {
-        value = { ...(value ?? {}), [field]: next } as SkinSettings
-      },
-      subscribe: (listener: () => void) => {
-        listeners.add(listener)
-        return () => { listeners.delete(listener) }
-      },
-    },
-    read: () => value,
-  }
+/** Fetch-backed settings mock mirroring the host route (/skin-manager/settings). */
+function fakeHost(initial?: SkinSettings) {
+  let value = initial ?? { skin: 'classic' }
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input)
+    if (url === '/skin-manager/settings') {
+      if (init?.method === 'POST') {
+        const body = JSON.parse(String(init.body)) as { field: string; value: unknown }
+        value = { ...value, [body.field]: body.value } as SkinSettings
+      }
+      return new Response(JSON.stringify(value), { status: 200 })
+    }
+    return new Response('', { status: 404 })
+  })
+  vi.stubGlobal('fetch', fetchMock)
+  return { fetchMock, read: () => value }
 }
 
-function fakeCtx() {
+function fakeCtx(initial?: SkinSettings) {
   const provided = new Map<string, unknown>()
   const effects: (() => unknown)[] = []
   const registrations: Array<{ slotName: string; registration: RowRegistration }> = []
   let localeNamespace: string | undefined
   let injectName: string | undefined
-  const host = fakeHost()
+  const host = fakeHost(initial)
 
   const ctx = {
     provide: (key: string, value: unknown) => { provided.set(key, value) },
@@ -56,9 +56,6 @@ function fakeCtx() {
     locale: {
       register: (namespace: string) => { localeNamespace = namespace },
       bind: () => (key: string) => key,
-    },
-    settingsScope: {
-      bind: () => host.scope,
     },
     slots: {
       inject: (name: string, factory: () => unknown) => {
@@ -80,6 +77,14 @@ function fakeCtx() {
     readLocale: () => localeNamespace,
   }
 }
+
+async function flushMutations(): Promise<void> {
+  await new Promise(resolve => setTimeout(resolve, 0))
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 describe('dsh-skin-manager client apply', () => {
   it('declares the public client manifest', () => {
@@ -109,9 +114,10 @@ describe('dsh-skin-manager client apply', () => {
     expect(row.registration.locale).toBe(SETTINGS_NS)
   })
 
-  it('drives a persisted switch through the injected setSkin face', () => {
+  it('drives a persisted switch through the injected setSkin face', async () => {
     const { ctx, provided, host, readRegistrations } = fakeCtx()
     apply(ctx)
+    await flushMutations()
 
     const runtime = provided.get('skinManager') as SkinManagerRuntime
     const applySkin = vi.fn(() => () => {})
@@ -124,6 +130,7 @@ describe('dsh-skin-manager client apply', () => {
     expect(syncSpy).toHaveBeenCalledWith(expect.objectContaining({ activeId: 'classic' }))
 
     setSkin('maid-atelier')
+    await flushMutations()
 
     expect(applySkin).toHaveBeenCalledTimes(1)
     expect(document.body.dataset.dsSkin).toBe('maid-atelier')

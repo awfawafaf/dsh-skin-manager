@@ -5,16 +5,14 @@
  * surface.
  */
 import type { BoundActions } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ClientContext, SettingsScope } from '@deepseek-ai/dsh-client-runtime/client'
-// Type-only: the ctx.settingsScope Context merge. Cross-plugin collaboration
-// goes through the service, never a value import (client bundle purity gate).
-import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
+import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: pulls the locale plugin's Context merge (ctx.locale).
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type { SkinRowInjected } from './skin-row.tsx'
 import { SkinRow } from './skin-row.tsx'
 import { AppearanceSection } from './appearance-section.tsx'
 import { createSkinRowStore } from './settings-store.ts'
+import { createFetchScope } from './fetch-scope.ts'
 import { zh, en, type SkinManagerKey } from './locales.ts'
 import { SkinManagerRuntime } from './skin-manager.ts'
 import type { SkinManagerSnapshot } from '../skin-contract.ts'
@@ -36,16 +34,17 @@ export type { SkinManagerSnapshot } from '../skin-contract.ts'
 // emitted declarations, so consumers' programs pick up the SlotMap merge.
 export type { SettingsAppearanceItemOwnerProps } from './appearance-section.tsx'
 
-/** Required services: settings transport plus slots/locale for the skin row. */
-export const inject = ['slots', 'locale', 'connection', 'remote', 'settingsScope']
+/** Required services: slots/locale for the skin row (the preference rides
+ * the plugin's own host route, not the settings BFF). */
+export const inject = ['slots', 'locale']
 
 /**
  * Client plugin body: provide the skin-manager service and register the
- * General-section skin row.
+ * Appearance-section skin row.
  * @param ctx - client cordis context.
  */
 export function apply(ctx: ClientContext): void {
-  const host = ctx.settingsScope.bind<SkinSettings>({ namespace: SKIN_SETTINGS_NAMESPACE })
+  const host = createFetchScope<SkinSettings>('/skin-manager/settings')
   const runtime = new SkinManagerRuntime(ctx, host)
   ctx.provide('skinManager', runtime)
   ctx.effect(() => () => runtime.dispose(), 'dsh-skin-manager: active skin teardown')

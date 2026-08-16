@@ -11,11 +11,12 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 export { CLASSIC_SKIN, SkinManagerRuntime } from './skin-manager.ts';
 export type { SkinManagerSnapshot } from '../skin-contract.ts';
 export type { SettingsAppearanceItemOwnerProps } from './appearance-section.tsx';
-/** Required services: settings transport plus slots/locale for the skin row. */
+/** Required services: slots/locale for the skin row (the preference rides
+ * the plugin's own host route, not the settings BFF). */
 export declare const inject: string[];
 /**
  * Client plugin body: provide the skin-manager service and register the
- * General-section skin row.
+ * Appearance-section skin row.
  * @param ctx - client cordis context.
  */
 export declare function apply(ctx: ClientContext): void;
